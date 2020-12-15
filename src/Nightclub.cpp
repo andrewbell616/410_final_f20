@@ -19,14 +19,20 @@ const int NUMB_THREADS =20;
 const int MAX_PEOPLE =2;
 std::vector<thread> thds;
 
+Semaphore semaphore(MAX_PEOPLE);
+mutex log_mutex;
+
 void log(string s){
+	lock_guard<mutex> log_lock(log_mutex);
 	cout<<s<<endl;
 }
 
 void inside(int id){
+	semaphore.wait();
 	//bask in noisy ambiance
 	log(string("Thread "+to_string(id)+" is inside"));
 	std::this_thread::sleep_for (std::chrono::seconds(1));
+	semaphore.signal();
 }
 
 void nc(int id){

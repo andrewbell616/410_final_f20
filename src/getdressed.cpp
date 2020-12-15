@@ -19,16 +19,34 @@ bool socks_are_on =false;
 bool shoes_are_on =false;
 bool coat_is_on =false;
 
+condition_variable cv_socks;
+condition_variable cv_shoes;
+mutex m;
+
 void putonsocks(){
+	lock_guard<mutex> cout_gd(m);
 	cout<<"socks on"<<endl;
+	socks_are_on = true;
+	cv_socks.notify_all();
 }
 
 void putonshoes(){
+	unique_lock<mutex> lck(m);
+	while(!socks_are_on){
+		cv_socks.wait(lck);
+	}
 	cout<<"shoes on"<<endl;
+	shoes_are_on = true;
+	cv_shoes.notify_all();
 }
 
 void putoncoat(){
+	unique_lock<mutex> lck(m);
+	while(!shoes_are_on){
+		cv_shoes.wait(lck);
+	}
 	cout<<"coat on"<<endl;
+	coat_is_on = true;
 }
 
 //PLEASE DO NOT CHANGE THIS FUNCTION
